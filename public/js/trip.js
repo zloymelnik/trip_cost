@@ -4,13 +4,6 @@ $(function () {
     var $table = $split.find('table');
     var $rows = $table.find('tbody');
 
-    function formatCents(cents) {
-        var sign = cents < 0n ? '-' : '';
-        var absolute = cents < 0n ? -cents : cents;
-        var rubles = (absolute / 100n).toLocaleString('ru-RU');
-        return sign + rubles + ',' + String(absolute % 100n).padStart(2, '0');
-    }
-
     $.getJSON('api/trip_split.php', { trip_id: $split.attr('data-trip-id') })
         .done(function (data) {
             var totalCents = 0n;

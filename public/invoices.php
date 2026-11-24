@@ -71,9 +71,5 @@ page_header('Счета');
     </tbody>
 </table>
 
-<h2>Сформировать счета за месяц</h2>
-<form class="actions" method="post" action="billing_run.php">
-    <input type="month" name="period" value="<?= h($period) ?>">
-    <button type="submit">Сформировать</button>
-</form>
+<p><a href="billing.php<?= is_billing_period($period) ? '?period=' . h($period) : '' ?>">Сформировать счета за месяц</a></p>
 <?php page_footer();
