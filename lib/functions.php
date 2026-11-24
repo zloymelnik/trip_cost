@@ -10,6 +10,11 @@ function money($x)
     return number_format((float)$x, 2, ',', ' ');
 }
 
+function format_money_cents(int $cents): string
+{
+    return sprintf('%s%d.%02d', $cents < 0 ? '-' : '', abs(intdiv($cents, 100)), abs($cents % 100));
+}
+
 function num($x, $decimals = 0)
 {
     return number_format((float)$x, $decimals, ',', ' ');
