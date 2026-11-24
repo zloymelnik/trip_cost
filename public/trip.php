@@ -14,12 +14,6 @@ $cargo = db()->query("SELECT c.*, cl.name AS client_name
     WHERE c.trip_id = $id
     ORDER BY cl.name, c.id")->fetchAll();
 
-$shares = calc_share($id);
-$shares_total = 0;
-foreach ($shares as $share) {
-    $shares_total += $share['amount'];
-}
-
 page_header('Рейс ' . $trip['number']);
 ?>
 <p><a href="index.php">← Рейсы</a></p>
@@ -59,29 +53,29 @@ page_header('Рейс ' . $trip['number']);
     </tbody>
 </table>
 
-<h2>Доли клиентов</h2>
-<table class="grid">
-    <thead>
-    <tr>
-        <th>Клиент</th>
-        <th class="r">Вес, кг</th>
-        <th class="r">Доля, %</th>
-        <th class="r">Сумма, ₽</th>
-    </tr>
-    </thead>
-    <tbody>
-    <?php foreach ($shares as $share): ?>
+<section id="trip-split" data-trip-id="<?= $id ?>" aria-labelledby="trip-split-title">
+    <h2 id="trip-split-title">Распределение стоимости</h2>
+    <p role="status">Загрузка распределения стоимости…</p>
+    <table class="grid" hidden>
+        <thead>
         <tr>
-            <td><?= h($share['name']) ?></td>
-            <td class="r"><?= num($share['weight_kg']) ?></td>
-            <td class="r"><?= num($share['share'] * 100, 1) ?></td>
-            <td class="r"><?= money($share['amount']) ?></td>
+            <th>Клиент</th>
+            <th class="r">Число грузов</th>
+            <th class="r">Вес, кг</th>
+            <th class="r">Объём, м³</th>
+            <th class="r">Доля, %</th>
+            <th class="r">Сумма, ₽</th>
         </tr>
-    <?php endforeach; ?>
-    <tr class="total">
-        <td colspan="3">Итого</td>
-        <td class="r"><?= money($shares_total) ?></td>
-    </tr>
-    </tbody>
-</table>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+        <tr class="total">
+            <td colspan="4">Итого, ₽</td>
+            <td class="r">По клиентам<br><span id="trip-split-total"></span></td>
+            <td class="r">Стоимость рейса<br><span id="trip-split-cost"></span></td>
+        </tr>
+        </tfoot>
+    </table>
+</section>
+<script src="js/trip.js"></script>
 <?php page_footer();
