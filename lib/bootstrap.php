@@ -7,4 +7,5 @@ ini_set('display_errors', '1');
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/trip_split.php';
+require_once __DIR__ . '/billing_plan.php';
 require_once __DIR__ . '/billing.php';
