@@ -37,6 +37,8 @@ CREATE TABLE invoices (
     exported_at TEXT
 );
 
+CREATE UNIQUE INDEX invoices_client_period ON invoices(client_id, period);
+
 CREATE TABLE invoice_lines (
     id INTEGER PRIMARY KEY,
     invoice_id INTEGER NOT NULL REFERENCES invoices(id),

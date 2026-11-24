@@ -31,7 +31,7 @@ function build_billing_plan(PDO $db, string $period): array
         $invoices[$clientId] = $invoice;
     }
 
-    $lineQuery = $db->prepare('SELECT i.client_id, l.trip_id, l.amount
+    $lineQuery = $db->prepare('SELECT l.id, i.client_id, l.trip_id, l.amount
         FROM invoice_lines l JOIN invoices i ON i.id = l.invoice_id
         WHERE i.period = ? ORDER BY l.trip_id, l.id');
     $lineQuery->execute([$period]);
@@ -39,6 +39,7 @@ function build_billing_plan(PDO $db, string $period): array
         $invoices[$line['client_id']]['lines'][] = [
             'trip_id' => $line['trip_id'],
             'amount_cents' => stored_billing_cents($line['amount']),
+            'id' => $line['id'],
         ];
     }
 
@@ -74,7 +75,12 @@ function build_billing_plan(PDO $db, string $period): array
         if (!is_int($after) || !is_int($diff)) {
             throw new DomainException("Сумма счёта за $period выходит за пределы расчёта.");
         }
-        $linesChanged = ($invoice['lines'] ?? []) !== $lines;
+        $previousLines = $invoice['lines'] ?? [];
+        $previousAmounts = array_map(static fn(array $line) => [
+            'trip_id' => $line['trip_id'],
+            'amount_cents' => $line['amount_cents'],
+        ], $previousLines);
+        $linesChanged = $previousAmounts !== $lines;
         $change = 'unchanged';
         if ($invoice === null) {
             $change = 'create';
@@ -95,6 +101,7 @@ function build_billing_plan(PDO $db, string $period): array
             'change' => $change,
             'lines_changed' => $linesChanged,
             'lines' => $lines,
+            'previous_lines' => $previousLines,
         ];
         $totalBefore += $before;
         $totalAfter += $after;
@@ -112,5 +119,49 @@ function build_billing_plan(PDO $db, string $period): array
         'total_after_cents' => $totalAfter,
         'total_diff_cents' => $totalDiff,
         'weight_based_trips' => $weightBasedTrips,
+    ];
+}
+
+function preview_billing_plan(PDO $db, string $period): array
+{
+    $db->beginTransaction();
+    try {
+        $plan = build_billing_plan($db, $period);
+        $db->commit();
+        return $plan;
+    } catch (Throwable $error) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        throw $error;
+    }
+}
+
+function billing_plan_payload(array $plan): array
+{
+    $clients = [];
+    foreach ($plan['clients'] as $client) {
+        $clients[] = [
+            'client_id' => $client['client_id'],
+            'name' => $client['name'],
+            'invoice_id' => $client['invoice_id'],
+            'status' => $client['status'],
+            'sent_at' => $client['sent_at'],
+            'exported_at' => $client['exported_at'],
+            'before' => format_money_cents($client['before_cents']),
+            'after' => format_money_cents($client['after_cents']),
+            'diff' => format_money_cents($client['diff_cents']),
+            'change' => $client['change'],
+            'lines_changed' => $client['lines_changed'],
+        ];
+    }
+
+    return [
+        'period' => $plan['period'],
+        'clients' => $clients,
+        'total_before' => format_money_cents($plan['total_before_cents']),
+        'total_after' => format_money_cents($plan['total_after_cents']),
+        'total_diff' => format_money_cents($plan['total_diff_cents']),
+        'weight_based_trips' => $plan['weight_based_trips'],
     ];
 }

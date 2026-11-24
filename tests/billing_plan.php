@@ -23,7 +23,8 @@ foreach ([null, ['2026-10'], '0000-10', '2026-00', '2026-13', '2026-2', "2026-10
 }
 
 $db->exec('PRAGMA query_only = ON');
-$october = build_billing_plan($db, '2026-10');
+$october = preview_billing_plan($db, '2026-10');
+expect_same(false, $db->inTransaction(), 'Транзакция закрыта после успешного предпросмотра');
 expect_same(45_461_078, $october['total_before_cents'], 'Итог октября до пересчёта');
 expect_same(45_461_080, $october['total_after_cents'], 'Итог октября после пересчёта');
 expect_same(2, $october['total_diff_cents'], 'Разница итогов октября');
@@ -77,10 +78,11 @@ expect_same([], $clients[3]['lines'], 'Строки счёта без подхо
 expect_same(false, $clients[4]['lines_changed'], 'Неизменившиеся строки');
 
 try {
-    build_billing_plan($db, '2027-02');
+    preview_billing_plan($db, '2027-02');
     throw new RuntimeException('Ожидалась ошибка рейса без грузов');
 } catch (DomainException $error) {
     expect_same('У рейса Тест-108 нет грузов.', $error->getMessage(), 'Причина ошибки расчёта');
 }
+expect_same(false, $db->inTransaction(), 'Транзакция закрыта после ошибки предпросмотра');
 
 echo "Проверки предпросмотра счетов прошли.\n";
