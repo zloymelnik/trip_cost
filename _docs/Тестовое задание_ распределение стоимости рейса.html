@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Тестовое задание: распределение стоимости рейса</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --max-width: 960px;
+        --accent: #2e7dff;
+        --bg: #f5f6f9;
+        --card-bg: #ffffff;
+        --text: #1f2430;
+        --muted: #5b667c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 40px 16px;
+      }
+
+      main {
+        width: 100%;
+        max-width: var(--max-width);
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      header {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(32px, 5vw, 42px);
+        letter-spacing: -0.5px;
+      }
+
+      p.lead {
+        margin: 0 auto;
+        max-width: 720px;
+        font-size: 18px;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      section {
+        background: var(--card-bg);
+        border-radius: 18px;
+        padding: 32px;
+        border: 1px solid rgba(46, 125, 255, 0.08);
+        box-shadow: 0 16px 40px rgba(31, 36, 48, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 26px;
+      }
+
+      p {
+        margin: 0;
+        line-height: 1.7;
+        font-size: 17px;
+      }
+
+      ul,
+      ol {
+        margin: 0;
+        padding-left: 20px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        line-height: 1.7;
+        font-size: 17px;
+      }
+
+      code {
+        background: rgba(46, 125, 255, 0.12);
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        font-size: 0.95em;
+      }
+
+      pre {
+        margin: 0;
+        padding: 16px 20px;
+        background: rgba(46, 125, 255, 0.08);
+        border-radius: 14px;
+        overflow-x: auto;
+        font-family: "JetBrains Mono", "Fira Code", monospace;
+        font-size: 0.95em;
+        line-height: 1.6;
+      }
+
+      pre code {
+        background: none;
+        padding: 0;
+      }
+
+      .callout {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .meta-line {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: baseline;
+      }
+
+      .meta-label {
+        font-weight: 600;
+        color: var(--muted);
+        letter-spacing: 0.01em;
+      }
+
+      .sub-list {
+        margin-top: 4px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      a.cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 22px;
+        border-radius: 12px;
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      a.cta:hover,
+      a.cta:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 24px rgba(46, 125, 255, 0.28);
+      }
+
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 720px) {
+        body {
+          padding: 24px 12px;
+        }
+
+        section {
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Тестовое задание</h1>
+        <p class="lead">
+          Доработайте небольшую систему учёта рейсов: новый расчёт долей клиентов, API, блок в карточке рейса и экран
+          пересчёта счетов. Работа с ИИ-агентом обязательна, инструмент выбирайте сами.
+        </p>
+      </header>
+
+      <section aria-labelledby="context">
+        <h2 id="context">📘 Контекст</h2>
+        <p>
+          Компания перевозит сборные грузы: в одной машине едут грузы разных клиентов. Стоимость рейса компания делит
+          между клиентами, и раз в месяц по этим долям выставляет каждому клиенту счёт. Бухгалтер формирует черновики
+          счетов за месяц, проверяет их, отправляет клиентам и затем выгружает в 1С.
+        </p>
+        <p>
+          Сейчас стоимость делится по весу груза. Финансовая служба решила перейти на деление по объёму: клиенты с
+          лёгким объёмным грузом (чипсы, хлеб, упаковка) занимают полмашины, а платят копейки.
+        </p>
+        <p>
+          Вам дан стартовый проект, небольшая система в стиле нашей основной (PHP без фреймворка, SQLite, jQuery). В нём
+          есть журнал рейсов, карточка рейса, счета клиентов, отчёт о загрузке машин и выгрузка счетов в 1С.
+        </p>
+        <ul>
+          <li>Стартовый проект: <a href="trip-cost-starter.zip">trip-cost-starter.zip</a></li>
+          <li>Окружение: PHP 8.2+ с расширением <code>pdo_sqlite</code>. Composer можно подключить по желанию.</li>
+          <li>Как запустить, написано в README проекта.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="requirements">
+        <h2 id="requirements">⚙️ Функциональные требования</h2>
+        <ol>
+          <li>
+            <strong>Расчёт долей рейса</strong>
+            <ul class="sub-list">
+              <li>Стоимость рейса делится между клиентами пропорционально объёму их груза в рейсе (м³).</li>
+              <li>
+                Сумма долей по рейсу совпадает со стоимостью рейса до копейки. Сейчас бывает расхождение на 1-2 копейки,
+                и бухгалтерия правит счета руками.
+              </li>
+              <li>Повторный расчёт на тех же данных даёт тот же результат.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>API долей рейса</strong>
+            <div class="callout">
+              <div class="meta-line">
+                <span class="meta-label">Метод:</span>
+                <code>GET /api/trip_split.php?trip_id=11</code>
+              </div>
+              <div class="meta-line">
+                <span class="meta-label">Пример ответа:</span>
+              </div>
+              <pre><code>{
+  "trip_id": 11,
+  "number": "МСК-1111",
+  "cost": "48750.50",
+  "clients": [
+    { "client_id": 1, "name": "ООО «Хрустим»", "cargo_count": 2,
+      "weight_kg": 120, "volume_m3": 8, "share": 0.8, "amount": "39000.40" },
+    { "client_id": 2, "name": "ООО «Родник»", "cargo_count": 1,
+      "weight_kg": 2000, "volume_m3": 2, "share": 0.2, "amount": "9750.10" }
+  ]
+}</code></pre>
+            </div>
+            <ul class="sub-list">
+              <li>Если рейс не найден, метод отвечает <code>404</code>.</li>
+              <li>Можно добавить свои поля, если они нужны экрану.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Блок «Распределение стоимости» в карточке рейса</strong>
+            <ul class="sub-list">
+              <li>
+                В карточке рейса (<code>public/trip.php</code>) нужна таблица по клиентам: клиент, число грузов, вес,
+                объём, доля в процентах, сумма.
+              </li>
+              <li>Итоговая строка: сумма по клиентам и стоимость рейса.</li>
+              <li>Блок получает данные из API. Фронт на jQuery, как в остальном проекте.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>API счетов за месяц</strong>
+            <p>
+              Сейчас счета за месяц формирует кнопка «Сформировать счета за месяц» на странице счетов
+              (<code>public/billing_run.php</code>). Она сразу пишет в базу. Нужны два метода: сначала посмотреть, что
+              изменится, потом применить.
+            </p>
+            <div class="callout">
+              <div class="meta-line">
+                <span class="meta-label">Предпросмотр, ничего не меняет в базе:</span>
+                <code>GET /api/billing_preview.php?period=2026-10</code>
+              </div>
+              <div class="meta-line">
+                <span class="meta-label">Пример ответа (числа условные):</span>
+              </div>
+              <pre><code>{
+  "period": "2026-10",
+  "clients": [
+    { "client_id": 1, "name": "ООО «Хрустим»", "invoice_id": 41,
+      "before": "18200.00", "after": "31450.75", "diff": "13250.75" },
+    { "client_id": 3, "name": "ООО «Молочный двор»", "invoice_id": 42,
+      "before": "52400.00", "after": "39149.25", "diff": "-13250.75" }
+  ],
+  "total_before": "70600.00",
+  "total_after": "70600.00"
+}</code></pre>
+              <div class="meta-line">
+                <span class="meta-label">Применение:</span>
+                <code>POST /api/billing_apply.php</code>
+                <code>period=2026-10</code>
+              </div>
+            </div>
+            <ul class="sub-list">
+              <li>Формирует счета периода по новому правилу: создаёт недостающие, пересчитывает существующие.</li>
+              <li>Повторный вызов с тем же периодом не меняет данные и не создаёт дублей.</li>
+              <li>В ответе метод сообщает, что изменено.</li>
+              <li>Можно добавить свои поля, если они нужны экрану.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Экран «Счета за месяц»</strong>
+            <ul class="sub-list">
+              <li>Новая страница <code>public/billing.php</code>, ссылка в меню.</li>
+              <li>
+                Выбор месяца → кнопка «Показать» → таблица «было / стало» по клиентам: сумма сейчас, сумма по новому
+                правилу, разница, итоги.
+              </li>
+              <li>Кнопка «Применить» спрашивает подтверждение. После применения пользователь видит, что изменилось.</li>
+            </ul>
+          </li>
+          <li>
+            <strong>Октябрь 2026</strong>
+            <ul class="sub-list">
+              <li>
+                Счета за октябрь сформированы по старому правилу. Бухгалтерия закрывает месяц. Пересчитайте октябрь по
+                новому правилу через новый экран.
+              </li>
+              <li>Приложите к README, что показал экран после применения октября: таблицу или скриншот.</li>
+            </ul>
+          </li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="questions">
+        <h2 id="questions">❓ Вопросы</h2>
+        <ul>
+          <li>Вопросы по заданию можно задать один раз, одним письмом, в первые 3 дня после получения задания.</li>
+          <li>
+            Адрес: <a href="mailto:serggit+phptest@yandex.ru">serggit+phptest@yandex.ru</a>, тема «Вопросы по заданию,
+            ФИО».
+          </li>
+          <li>Ответим в течение рабочего дня. На часть вопросов ответим «решите сами». Это нормальный рабочий ответ.</li>
+          <li>Задавать вопросы не обязательно.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="results">
+        <h2 id="results">✅ Ожидаемые результаты</h2>
+        <ul>
+          <li>Репозиторий с кодом на основе стартового проекта.</li>
+          <li>README: как запустить, что сделано и что нет.</li>
+          <li>Сессия работы с ИИ-агентом: экспорт или ключевые промпты, в репозитории.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="extras">
+        <h2 id="extras">➕ Дополнительные требования</h2>
+        <ul>
+          <li>
+            Запись экрана с голосовыми комментариями: весь процесс работы над заданием. Длительность не ограничена,
+            видео можно смонтировать.
+          </li>
+          <li>Подготовка разрешена: можно заранее изучить материалы и документацию.</li>
+          <li>
+            Видео загрузите на Яндекс.Диск и откройте доступ для <strong>serggit@yandex.ru</strong>.
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="actions">
+        <h2 id="actions">🚀 Что сделать кандидату</h2>
+        <ol>
+          <li>Скачайте стартовый проект и запустите его по README.</li>
+          <li>Выполните задание.</li>
+          <li>
+            Отправьте ссылки на видео и репозиторий на
+            <a href="mailto:serggit+phptest@yandex.ru">serggit+phptest@yandex.ru</a> с темой «Видео-вакансия, результат,
+            ФИО».
+          </li>
+          <li>Срок выполнения: 10 дней со дня получения письма со ссылкой на задание.</li>
+        </ol>
+        <div class="actions">
+          <a class="cta" href="index.html">← Вернуться к видео-вакансии</a>
+        </div>
+      </section>
+
+      <footer>Успехов! Ждём ссылки на результат и будем рады обсудить продолжение.</footer>
+    </main>
+  </body>
+</html>

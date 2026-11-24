@@ -1,34 +1,21 @@
 <?php
 
 /**
- * Доли клиентов в стоимости рейса.
- *
- * Стоимость рейса делится между клиентами пропорционально весу их груза.
- * Возвращает [client_id => [name, weight_kg, share, amount]], share: доля от 0 до 1.
+ * Расчёт по весу для текущей карточки рейса и формирования счетов.
  */
 function calc_share($trip_id)
 {
     $trip_id = (int)$trip_id;
     $trip = db()->query("SELECT cost FROM trips WHERE id = $trip_id")->fetch();
-    $rows = db()->query("SELECT c.client_id, cl.name, SUM(c.weight_kg) AS weight_kg
-        FROM cargo c
-        JOIN clients cl ON cl.id = c.client_id
-        WHERE c.trip_id = $trip_id
-        GROUP BY c.client_id, cl.name")->fetchAll();
-
-    $total_weight = 0;
-    foreach ($rows as $row) {
-        $total_weight += $row['weight_kg'];
-    }
+    $shares = trip_weight_shares(load_trip_cargo_totals(db(), $trip_id));
 
     $result = array();
-    foreach ($rows as $row) {
-        $share = $total_weight > 0 ? $row['weight_kg'] / $total_weight : 0;
-        $result[$row['client_id']] = array(
-            'name' => $row['name'],
-            'weight_kg' => $row['weight_kg'],
-            'share' => $share,
-            'amount' => round($trip['cost'] * $share, 2),
+    foreach ($shares as $clientId => $client) {
+        $result[$clientId] = array(
+            'name' => $client['name'],
+            'weight_kg' => $client['weight_kg'],
+            'share' => $client['share'],
+            'amount' => round($trip['cost'] * $client['share'], 2),
         );
     }
 

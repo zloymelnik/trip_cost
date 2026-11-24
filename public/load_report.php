@@ -40,7 +40,7 @@ page_header('Загрузка машин');
     <?php foreach ($trips as $trip): ?>
         <?php
         $load = $trip['capacity_kg'] ? $trip['weight_kg'] / $trip['capacity_kg'] * 100 : 0;
-        $shares = calc_share($trip['id']);
+        $shares = trip_weight_shares(load_trip_cargo_totals(db(), $trip['id']));
         uasort($shares, function ($a, $b) {
             return $b['share'] <=> $a['share'];
         });
